@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.gradient-text {
+  background: linear-gradient(
+    to right,
+    #6a1b9a,
+    #6a1b9a,
+    #85ebff,
+    #6a1b9a,
+    #85aeff,
+    #6a1b9a,
+    #6a1b9a
+  );
+  background-clip: text;
+  color: transparent;
+  background-size: 200%;
+  animation: gradientAnimation 5s linear infinite;
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 200% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@layer utilities {
+  @keyframes display-text {
+    0%,
+    25% {
+      opacity: 1;
+    }
+    26%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes fill-text {
+    10%,
+    100% {
+      width: 0;
+    }
+    70%,
+    90% {
+      width: 100%;
+    }
+  }
+
+  .word-container {
+    position: relative;
+    display: inline-block;
+    width: 280px;
+    height: 1.4em;
+    overflow: hidden;
+  }
+
+  .word {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 64px;
+    font-weight: bold;
+    line-height: 1.2;
+    color: transparent;
+    -webkit-text-stroke: 2px #8b5cf6;
+    animation: display-text 16s linear infinite;
+  }
+
+  .word::before {
+    content: attr(data-text);
+    position: absolute;
+    width: 0;
+    height: 1.2em;
+    border-right: 4px solid #8b5cf6;
+    color: #8b5cf6;
+    white-space: nowrap;
+    overflow: hidden;
+    animation: fill-text 4s linear infinite;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .word {
+      font-size: 42px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .word {
+      font-size: 32px;
+    }
+  }
+}
