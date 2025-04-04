@@ -98,3 +98,37 @@
     }
   }
 }
+
+/* Slider Pagination Styles */
+.project-slider .swiper-pagination,
+.service-slider .swiper-pagination {
+  bottom: 0px !important;
+}
+
+.service-slider .swiper-pagination {
+  padding-bottom: 4px;
+}
+
+.project-slider .custom-bullet,
+.service-slider .custom-bullet {
+  width: 12px;
+  height: 12px;
+  background-color: rgba(139, 92, 246, 0.3); /* light purple */
+  opacity: 1;
+  margin: 0 6px !important;
+  transition: all 0.3s ease;
+}
+
+.project-slider .custom-bullet-active,
+.service-slider .custom-bullet-active {
+  width: 16px;
+  height: 16px;
+  background-color: rgba(139, 92, 246, 1); /* purple-600 */
+  transform: scale(1);
+  position: relative;
+}
+
+.project-slider .custom-bullet:hover,
+.service-slider .custom-bullet:hover {
+  background-color: rgba(139, 92, 246, 0.7);
+}

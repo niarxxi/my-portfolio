@@ -1,254 +1,198 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination, Autoplay } from "swiper/modules";
-import { ProjectsData } from "@/constants";
+import { ProjectsData, ProjectItem } from "@/constants";
 import Image from "next/image";
 import ProjectModal from "./ProjectModal";
 import { ChevronRight } from "lucide-react";
 
 const ProjectSlider = () => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
   const [slidesPerView, setSlidesPerView] = useState(2);
   const [isMobile, setIsMobile] = useState(false);
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
+  const [visibleSlides, setVisibleSlides] = useState<Set<number>>(new Set([0, 1]));
+
   const sliderRef = useRef<HTMLDivElement>(null);
 
-  // Функция для обработки изменения размера окна и установки правильного количества слайдов для отображения
   const handleResize = useCallback(() => {
     const width = window.innerWidth;
-
-    if (width < 768) {
-      // Мобильные экраны
-      setSlidesPerView(1);
-      setIsMobile(true);
-    } else {
-      // Планшеты и настольные экраны
-      setSlidesPerView(2);
-      setIsMobile(false);
-    }
+    const isMobileView = width < 768;
+    setSlidesPerView(isMobileView ? 1 : 2);
+    setIsMobile(isMobileView);
   }, []);
 
-  // Настройка слушателя изменения размера
   useEffect(() => {
-    // Начальный вызов
     handleResize();
 
-    // Обработчик изменения размера с задержкой для лучшей производительности
     let timeoutId: NodeJS.Timeout;
     const debouncedResize = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(handleResize, 200);
     };
 
-    // Добавить слушатель событий
     window.addEventListener("resize", debouncedResize);
-
-    // Очистка
     return () => {
       window.removeEventListener("resize", debouncedResize);
       clearTimeout(timeoutId);
     };
   }, [handleResize]);
 
-  const openModal = useCallback(
-    (project: any) => {
-      // Убедиться, что проект имеет все необходимые свойства перед открытием модального окна
-      const completeProject = {
-        title: project.title || "Untitled Project",
-        description: project.description || "No description available",
-        fullDescription:
-          project.fullDescription ||
-          project.description ||
-          "No description available",
-        technologies: project.technologies || [],
-        githubUrl: project.githubUrl || "#",
-        src: project.src || "/placeholder.svg",
-        liveUrl: project.liveUrl,
-      };
+  const getCompleteProject = useCallback((project: ProjectItem): ProjectItem => ({
+    title: project.title,
+    description: project.description,
+    fullDescription: project.fullDescription || project.description,
+    technologies: project.technologies,
+    githubUrl: project.githubUrl || "#",
+    src: project.src,
+    liveUrl: project.liveUrl,
+  }), []);
 
-      setSelectedProject(completeProject);
-      setModalOpen(true);
-
-      // Приостановить автовоспроизведение при открытом модальном окне
-      if (swiperInstance?.autoplay) {
-        swiperInstance.autoplay.stop();
-      }
-    },
-    [swiperInstance]
-  );
+  const openModal = useCallback((project: ProjectItem) => {
+    setSelectedProject(getCompleteProject(project));
+    setModalOpen(true);
+    swiperInstance?.autoplay?.stop();
+  }, [swiperInstance, getCompleteProject]);
 
   const closeModal = useCallback(() => {
     setModalOpen(false);
-
-    // Возобновить автовоспроизведение при закрытии модального окна
-    if (swiperInstance?.autoplay) {
-      swiperInstance.autoplay.start();
-    }
+    swiperInstance?.autoplay?.start();
   }, [swiperInstance]);
 
-  // Группировка проектов в слайды в зависимости от количества слайдов для просмотра
-  const projectSlides = [];
-  for (let i = 0; i < ProjectsData.length; i += slidesPerView) {
-    projectSlides.push(ProjectsData.slice(i, i + slidesPerView));
-  }
+  const projectSlides = useMemo(() => {
+    const slides: ProjectItem[][] = [];
+    for (let i = 0; i < ProjectsData.length; i += slidesPerView) {
+      slides.push(ProjectsData.slice(i, i + slidesPerView));
+    }
+    return slides;
+  }, [slidesPerView]);
+
+  const handleSlideChange = useCallback((swiper: SwiperType) => {
+    const newVisible = new Set<number>();
+    const index = swiper.activeIndex;
+    newVisible.add(index);
+    newVisible.add(Math.max(0, index - 1));
+    newVisible.add(Math.min(swiper.slides.length - 1, index + 1));
+    setVisibleSlides(newVisible);
+  }, []);
+
+  const shouldLoadImage = useCallback((index: number) => visibleSlides.has(index), [visibleSlides]);
+
+  const translations = useMemo(() => ({
+    details: "Подробнее",
+    projectShowcase: "Project showcase",
+  }), []);
 
   return (
     <div
-      className="w-full max-w-full px-4 sm:px-6 md:px-8 mx-auto"
       ref={sliderRef}
+      className="w-full max-w-6xl px-4 sm:px-6 md:px-8 mx-auto"
       role="region"
-      aria-label="Project showcase"
+      aria-label={translations.projectShowcase}
     >
-      {/* Основной контейнер слайдера */}
-      <div className="relative">
-        <Swiper
-          onSwiper={setSwiperInstance}
-          slidesPerView={1} // Всегда показывать 1 слайд (который содержит несколько проектов)
-          spaceBetween={16}
-          pagination={{
-            clickable: true,
-            bulletActiveClass:
-              "swiper-pagination-bullet-active custom-bullet-active",
-            bulletClass: "swiper-pagination-bullet custom-bullet",
-            renderBullet: function (index, className) {
-              return `<span class="${className}"></span>`;
-            },
-          }}
-          autoplay={{
-            delay: 5000,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true,
-          }}
-          modules={[Pagination, Autoplay]}
-          className="w-full project-slider"
-        >
-          {projectSlides.map((slideProjects, slideIndex) => (
-            <SwiperSlide key={`slide-${slideIndex}`} className="pb-14">
-              <div
-                className={`grid grid-cols-1 ${
-                  slidesPerView > 1 ? "sm:grid-cols-2" : ""
-                } gap-4 sm:gap-6 md:gap-8`}
-              >
-                {slideProjects.map((project, projectIndex) => {
-                  // Убедиться, что проект имеет массив технологий
-                  const projectWithDefaults = {
-                    ...project,
-                    technologies: project.technologies || [],
-                  };
+      <Swiper
+        onSwiper={(swiper) => {
+          setSwiperInstance(swiper);
+          setVisibleSlides(new Set([0, 1]));
+        }}
+        slidesPerView={1}
+        spaceBetween={16}
+        pagination={{
+          clickable: true,
+          bulletClass: "swiper-pagination-bullet custom-bullet",
+          bulletActiveClass: "swiper-pagination-bullet-active custom-bullet-active",
+          renderBullet: (_, className) => `<span class="${className}"></span>`,
+        }}
+        autoplay={{
+          delay: 5000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        }}
+        onSlideChange={handleSlideChange}
+        modules={[Pagination, Autoplay]}
+        className="w-full project-slider"
+      >
+        {projectSlides.map((projects, slideIndex) => (
+          <SwiperSlide key={`slide-${slideIndex}`} className="pb-14">
+            <div className={`grid grid-cols-1 ${slidesPerView > 1 ? "sm:grid-cols-2" : ""} gap-6 max-w-6xl mx-auto`}>
+              {projects.map((project, idx) => {
+                const shouldLoad = shouldLoadImage(slideIndex);
+                const isPriority = slideIndex === 0 && idx < 2;
 
-                  return (
-                    <div
-                      className="relative group aspect-video w-full cursor-pointer rounded-lg overflow-hidden"
-                      key={`${project.src}-${slideIndex}-${projectIndex}`}
-                      onClick={() => openModal(projectWithDefaults)}
-                      tabIndex={0}
-                      role="button"
-                      aria-label={`View details for ${project.title}`}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          openModal(projectWithDefaults);
-                        }
-                      }}
-                    >
-                      <div className="relative w-full h-full">
-                        <Image
-                          src={project.src || "/placeholder.svg"}
-                          alt={
-                            `Screenshot of ${project.title}` ||
-                            "Project screenshot"
-                          }
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          className="rounded-lg object-cover transition-transform duration-500 group-hover:scale-105 group-focus:scale-105"
-                          priority={slideIndex === 0 && projectIndex < 2}
-                        />
-                      </div>
-
-                      {/* Градиентный оверлей - виден только при наведении/фокусировке */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300 rounded-lg" />
-
-                      {/* Информация о проекте - видна только при наведении/фокусировке */}
-                      <div className="absolute inset-0 flex flex-col items-center justify-center p-4 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300">
-                        <h3 className="font-bold text-purple-300 text-lg md:text-xl mb-2 text-center">
-                          {project.title}
-                        </h3>
-                        <p className="text-sm text-center text-gray-200 mb-3 line-clamp-2 md:line-clamp-3">
-                          {project.description}
-                        </p>
-                        <div className="flex flex-wrap justify-center gap-2 mb-3">
-                          {projectWithDefaults.technologies
-                            .slice(0, isMobile ? 2 : 3)
-                            .map((tech, idx) => (
-                              <span
-                                key={idx}
-                                className="px-2 py-1 text-xs bg-purple-900/50 text-purple-200 rounded-full"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          {projectWithDefaults.technologies.length >
-                            (isMobile ? 2 : 3) && (
-                            <span className="px-2 py-1 text-xs bg-purple-900/30 text-purple-200 rounded-full">
-                              +
-                              {projectWithDefaults.technologies.length -
-                                (isMobile ? 2 : 3)}
-                            </span>
-                          )}
-                        </div>
-                        <span className="flex items-center text-sm text-purple-200">
-                          Подробнее
-                          <ChevronRight className="ml-1 w-4 h-4" />
-                        </span>
-                      </div>
+                return (
+                  <div
+                    key={`${project.src}-${slideIndex}-${idx}`}
+                    className="relative group aspect-[4/3] w-full cursor-pointer rounded-lg overflow-hidden"
+                    onClick={() => openModal(project)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`View details for ${project.title}`}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openModal(project);
+                      }
+                    }}
+                  >
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={project.src}
+                        alt={`Screenshot of ${project.title}`}
+                        fill
+                        className={`object-cover rounded-lg transition-transform duration-500 group-hover:scale-105 group-focus:scale-105 ${
+                          !shouldLoad ? "opacity-0" : "opacity-100"
+                        }`}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        priority={isPriority}
+                        loading={isPriority ? "eager" : "lazy"}
+                        placeholder="blur"
+                        blurDataURL="data:image/svg+xml;base64,..."
+                        onLoad={() => setVisibleSlides((prev) => new Set(prev).add(slideIndex))}
+                      />
+                      {!shouldLoad && <div className="absolute inset-0 bg-purple-900/20 rounded-lg animate-pulse" />}
                     </div>
-                  );
-                })}
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
 
-      <ProjectModal
-        isOpen={modalOpen}
-        onClose={closeModal}
-        project={selectedProject}
-      />
+                    <div className="absolute inset-0 bg-black opacity-30 group-hover:opacity-70 transition-opacity duration-300" />
 
-      {/* Стили для пагинации */}
-      <style jsx global>{`
-        .project-slider .swiper-pagination {
-          bottom: 0px !important;
-        }
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4 opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300">
+                      <h3 className="font-bold text-purple-300 text-lg md:text-xl mb-2 text-center">
+                        {project.title}
+                      </h3>
+                      <p className="text-sm text-center text-gray-200 mb-3 line-clamp-2 md:line-clamp-3">
+                        {project.description}
+                      </p>
+                      <div className="flex flex-wrap justify-center gap-2 mb-3">
+                        {project.technologies.slice(0, isMobile ? 2 : 3).map((tech, idx) => (
+                          <span key={idx} className="px-2 py-1 text-xs bg-purple-900/50 text-purple-200 rounded-full">
+                            {tech}
+                          </span>
+                        ))}
+                        {project.technologies.length > (isMobile ? 2 : 3) && (
+                          <span className="px-2 py-1 text-xs bg-purple-900/30 text-purple-200 rounded-full">
+                            +{project.technologies.length - (isMobile ? 2 : 3)}
+                          </span>
+                        )}
+                      </div>
+                      <span className="flex items-center text-sm text-purple-200">
+                        {translations.details}
+                        <ChevronRight className="ml-1 w-4 h-4" />
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
 
-        .project-slider .custom-bullet {
-          width: 12px;
-          height: 12px;
-          background-color: rgba(139, 92, 246, 0.3); /* light purple */
-          opacity: 1;
-          margin: 0 6px !important;
-          transition: all 0.3s ease;
-        }
-
-        .project-slider .custom-bullet-active {
-          width: 16px;
-          height: 16px;
-          background-color: rgba(139, 92, 246, 1); /* purple-600 */
-          transform: scale(1);
-          position: relative;
-        }
-
-        .project-slider .custom-bullet:hover {
-          background-color: rgba(139, 92, 246, 0.7);
-        }
-      `}</style>
+      <ProjectModal isOpen={modalOpen} onClose={closeModal} project={selectedProject} />
     </div>
   );
 };
