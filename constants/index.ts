@@ -63,7 +63,7 @@ export const ProjectsData: ProjectItem[] = [
     fullDescription:
       "Музыкальный плеер с современным интерфейсом, разработанный с использованием React и TypeScript. Приложение позволяет создавать плейлисты, искать треки, управлять воспроизведением и настраивать эквалайзер. Реализована адаптивная верстка для комфортного использования на различных устройствах.",
     technologies: ["React", "TypeScript", "Redux", "Styled Components"],
-    githubUrl: "https://github.com/niarxxi/niar-music-player",
+    githubUrl: "https://github.com/niarxxi/WebMusicPlayer",
     liveUrl: "https://niar-music-player.vercel.app",
     src: "/assets/projects/niar-music-player.png",
   },
@@ -73,7 +73,7 @@ export const ProjectsData: ProjectItem[] = [
     fullDescription:
       "Полнофункциональный интернет-магазин с каталогом товаров, корзиной и оформлением заказа. Реализована фильтрация товаров по категориям, поиск, валидация форм. Проект разработан с использованием ООП и паттерна MVP для обеспечения чистой архитектуры и масштабируемости.",
     technologies: ["TypeScript", "HTML", "CSS", "ООП", "MVP"],
-    githubUrl: "https://github.com/niarxxi/web-larek",
+    githubUrl: "https://github.com/niarxxi/web-larek-frontend",
     src: "/assets/projects/web-larek.png",
   },
   {
@@ -92,7 +92,7 @@ export const ProjectsData: ProjectItem[] = [
     fullDescription:
       "Социальная сеть для обмена фотографиями с возможностью добавления, удаления и лайка фотографий. Реализована авторизация пользователей, редактирование профиля, валидация форм. Проект разработан с использованием ООП и модульной структуры.",
     technologies: ["JavaScript", "HTML", "CSS", "Webpack", "REST API"],
-    githubUrl: "https://github.com/niarxxi/mesto",
+    githubUrl: "https://github.com/niarxxi/mesto-project-ff",
     src: "/assets/projects/mesto.png",
   },
   {
@@ -110,7 +110,7 @@ export const ProjectsData: ProjectItem[] = [
     fullDescription:
       "Интерактивный сервис, позволяющий просматривать различные виды из окон по всему миру. Реализована фильтрация по городам, типам видов, возможность добавления в избранное. Адаптивный дизайн обеспечивает комфортное использование на любых устройствах.",
     technologies: ["JavaScript", "HTML", "CSS", "API"],
-    githubUrl: "https://github.com/niarxxi/posmotri-v-okno",
+    githubUrl: "https://github.com/niarxxi/posmotri_v_okno",
     src: "/assets/projects/posmotri-v-okno.png",
   },
   {
