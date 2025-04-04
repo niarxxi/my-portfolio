@@ -12,7 +12,20 @@ export default function Home() {
   ];
 
   return (
-    <main className="flex items-center h-screen relative bg-cover bg-[url('/assets/bg-explosion.png')] overflow-hidden">
+    <main className="flex items-center h-screen relative overflow-hidden">
+      <div className="absolute inset-0">
+        <Image
+          src="/assets/bg-explosion.webp"
+          alt="Background"
+          fill
+          className="object-cover object-left"
+          quality={80}
+          priority
+          placeholder="blur"
+          blurDataURL="data:image/webp;base64,..."
+        />
+      </div>
+
       <div className="absolute right-0 top-0 h-full w-full md:w-[100%] z-[2]">
         <Particle />
       </div>

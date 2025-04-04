@@ -11,7 +11,8 @@ import { ServiceData, ServiceItem } from "@/constants";
 import Image from "next/image";
 
 // Удаление дубликатов через Set
-const removeDuplicates = (array: number[]): number[] => Array.from(new Set(array));
+const removeDuplicates = (array: number[]): number[] =>
+  Array.from(new Set(array));
 
 // Количество слайдов в зависимости от ширины экрана
 const getSlidesPerView = (width: number): number => {
@@ -36,7 +37,10 @@ const ServiceSlider = () => {
     const view = getSlidesPerView(width);
     setSlidesPerView(view);
 
-    const initial = Array.from({ length: Math.min(Math.max(3, view + 1), totalSlides) }, (_, i) => i);
+    const initial = Array.from(
+      { length: Math.min(Math.max(3, view + 1), totalSlides) },
+      (_, i) => i
+    );
     setVisibleSlides(initial);
   }, [totalSlides]);
 
@@ -46,8 +50,11 @@ const ServiceSlider = () => {
     const newView = getSlidesPerView(width);
     setSlidesPerView(newView);
 
-    const additional = Array.from({ length: Math.min(newView + 1, totalSlides) }, (_, i) => i);
-    setVisibleSlides(prev => removeDuplicates([...prev, ...additional]));
+    const additional = Array.from(
+      { length: Math.min(newView + 1, totalSlides) },
+      (_, i) => i
+    );
+    setVisibleSlides((prev) => removeDuplicates([...prev, ...additional]));
   }, [totalSlides]);
 
   // Подписка на resize
@@ -67,27 +74,36 @@ const ServiceSlider = () => {
     };
   }, [isClient, handleResize]);
 
-  const breakpoints = useMemo(() => ({
-    0: { slidesPerView: 1, spaceBetween: 10 },
-    1125: { slidesPerView: 2, spaceBetween: 15 },
-    1671: { slidesPerView: 3, spaceBetween: 15 },
-  }), []);
+  const breakpoints = useMemo(
+    () => ({
+      0: { slidesPerView: 1, spaceBetween: 10 },
+      1125: { slidesPerView: 2, spaceBetween: 15 },
+      1671: { slidesPerView: 3, spaceBetween: 15 },
+    }),
+    []
+  );
 
-  const handleSlideChange = useCallback((swiper: SwiperType) => {
-    const index = swiper.activeIndex;
-    const newVisible = [index];
+  const handleSlideChange = useCallback(
+    (swiper: SwiperType) => {
+      const index = swiper.activeIndex;
+      const newVisible = [index];
 
-    if (index > 0) newVisible.push(index - 1);
-    for (let i = 1; i <= slidesPerView; i++) {
-      if (index + i < totalSlides) newVisible.push(index + i);
-    }
+      if (index > 0) newVisible.push(index - 1);
+      for (let i = 1; i <= slidesPerView; i++) {
+        if (index + i < totalSlides) newVisible.push(index + i);
+      }
 
-    setVisibleSlides(prev => removeDuplicates([...prev, ...newVisible]));
-  }, [slidesPerView, totalSlides]);
+      setVisibleSlides((prev) => removeDuplicates([...prev, ...newVisible]));
+    },
+    [slidesPerView, totalSlides]
+  );
 
-  const shouldLoadSlide = useCallback((index: number) => {
-    return visibleSlides.includes(index) || index < 3;
-  }, [visibleSlides]);
+  const shouldLoadSlide = useCallback(
+    (index: number) => {
+      return visibleSlides.includes(index) || index < 3;
+    },
+    [visibleSlides]
+  );
 
   const handleImageError = useCallback((index: number) => {
     console.error(`Image failed to load for slide ${index}`);
@@ -106,9 +122,11 @@ const ServiceSlider = () => {
         freeMode
         pagination={{
           clickable: true,
-          bulletActiveClass: "swiper-pagination-bullet-active custom-bullet-active",
+          bulletActiveClass:
+            "swiper-pagination-bullet-active custom-bullet-active",
           bulletClass: "swiper-pagination-bullet custom-bullet",
-          renderBullet: (index, className) => `<span class="${className}"></span>`,
+          renderBullet: (index, className) =>
+            `<span class="${className}"></span>`,
         }}
         modules={[FreeMode, Pagination]}
         className="w-full service-slider"
@@ -143,7 +161,9 @@ const ServiceSlider = () => {
                         blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAwIiBoZWlnaHQ9IjQ3NSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiLz4="
                         onError={() => handleImageError(index)}
                         onLoad={() => {
-                          setVisibleSlides(prev => removeDuplicates([...prev, index]));
+                          setVisibleSlides((prev) =>
+                            removeDuplicates([...prev, index])
+                          );
                         }}
                       />
                     ) : (
@@ -159,10 +179,14 @@ const ServiceSlider = () => {
 
                 <div className="relative flex flex-col gap-3 z-10">
                   <item.icon className="text-blue-600 group-hover:text-blue-400 w-[32px] h-[32px] transition-colors duration-300" />
-                  <h2 className="text-xl lg:text-2xl font-bold">{item.title}</h2>
+                  <h2 className="text-xl lg:text-2xl font-bold">
+                    {item.title}
+                  </h2>
                   <ol className="list-decimal pl-5 text-base lg:text-[18px]">
                     {item.content.map((point, i) => (
-                      <li key={i} className="mb-1">{point}</li>
+                      <li key={i} className="mb-1">
+                        {point}
+                      </li>
                     ))}
                   </ol>
                 </div>

@@ -13,11 +13,15 @@ import { ChevronRight } from "lucide-react";
 
 const ProjectSlider = () => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(
+    null
+  );
   const [slidesPerView, setSlidesPerView] = useState(2);
   const [isMobile, setIsMobile] = useState(false);
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
-  const [visibleSlides, setVisibleSlides] = useState<Set<number>>(new Set([0, 1]));
+  const [visibleSlides, setVisibleSlides] = useState<Set<number>>(
+    new Set([0, 1])
+  );
 
   const sliderRef = useRef<HTMLDivElement>(null);
 
@@ -44,21 +48,27 @@ const ProjectSlider = () => {
     };
   }, [handleResize]);
 
-  const getCompleteProject = useCallback((project: ProjectItem): ProjectItem => ({
-    title: project.title,
-    description: project.description,
-    fullDescription: project.fullDescription || project.description,
-    technologies: project.technologies,
-    githubUrl: project.githubUrl || "#",
-    src: project.src,
-    liveUrl: project.liveUrl,
-  }), []);
+  const getCompleteProject = useCallback(
+    (project: ProjectItem): ProjectItem => ({
+      title: project.title,
+      description: project.description,
+      fullDescription: project.fullDescription || project.description,
+      technologies: project.technologies,
+      githubUrl: project.githubUrl || "#",
+      src: project.src,
+      liveUrl: project.liveUrl,
+    }),
+    []
+  );
 
-  const openModal = useCallback((project: ProjectItem) => {
-    setSelectedProject(getCompleteProject(project));
-    setModalOpen(true);
-    swiperInstance?.autoplay?.stop();
-  }, [swiperInstance, getCompleteProject]);
+  const openModal = useCallback(
+    (project: ProjectItem) => {
+      setSelectedProject(getCompleteProject(project));
+      setModalOpen(true);
+      swiperInstance?.autoplay?.stop();
+    },
+    [swiperInstance, getCompleteProject]
+  );
 
   const closeModal = useCallback(() => {
     setModalOpen(false);
@@ -82,12 +92,18 @@ const ProjectSlider = () => {
     setVisibleSlides(newVisible);
   }, []);
 
-  const shouldLoadImage = useCallback((index: number) => visibleSlides.has(index), [visibleSlides]);
+  const shouldLoadImage = useCallback(
+    (index: number) => visibleSlides.has(index),
+    [visibleSlides]
+  );
 
-  const translations = useMemo(() => ({
-    details: "Подробнее",
-    projectShowcase: "Project showcase",
-  }), []);
+  const translations = useMemo(
+    () => ({
+      details: "Подробнее",
+      projectShowcase: "Project showcase",
+    }),
+    []
+  );
 
   return (
     <div
@@ -106,7 +122,8 @@ const ProjectSlider = () => {
         pagination={{
           clickable: true,
           bulletClass: "swiper-pagination-bullet custom-bullet",
-          bulletActiveClass: "swiper-pagination-bullet-active custom-bullet-active",
+          bulletActiveClass:
+            "swiper-pagination-bullet-active custom-bullet-active",
           renderBullet: (_, className) => `<span class="${className}"></span>`,
         }}
         autoplay={{
@@ -120,7 +137,11 @@ const ProjectSlider = () => {
       >
         {projectSlides.map((projects, slideIndex) => (
           <SwiperSlide key={`slide-${slideIndex}`} className="pb-14">
-            <div className={`grid grid-cols-1 ${slidesPerView > 1 ? "sm:grid-cols-2" : ""} gap-6 max-w-6xl mx-auto`}>
+            <div
+              className={`grid grid-cols-1 ${
+                slidesPerView > 1 ? "sm:grid-cols-2" : ""
+              } gap-6 max-w-6xl mx-auto`}
+            >
               {projects.map((project, idx) => {
                 const shouldLoad = shouldLoadImage(slideIndex);
                 const isPriority = slideIndex === 0 && idx < 2;
@@ -153,9 +174,15 @@ const ProjectSlider = () => {
                         loading={isPriority ? "eager" : "lazy"}
                         placeholder="blur"
                         blurDataURL="data:image/svg+xml;base64,..."
-                        onLoad={() => setVisibleSlides((prev) => new Set(prev).add(slideIndex))}
+                        onLoad={() =>
+                          setVisibleSlides((prev) =>
+                            new Set(prev).add(slideIndex)
+                          )
+                        }
                       />
-                      {!shouldLoad && <div className="absolute inset-0 bg-purple-900/20 rounded-lg animate-pulse" />}
+                      {!shouldLoad && (
+                        <div className="absolute inset-0 bg-purple-900/20 rounded-lg animate-pulse" />
+                      )}
                     </div>
 
                     <div className="absolute inset-0 bg-black opacity-30 group-hover:opacity-70 transition-opacity duration-300" />
@@ -168,11 +195,16 @@ const ProjectSlider = () => {
                         {project.description}
                       </p>
                       <div className="flex flex-wrap justify-center gap-2 mb-3">
-                        {project.technologies.slice(0, isMobile ? 2 : 3).map((tech, idx) => (
-                          <span key={idx} className="px-2 py-1 text-xs bg-purple-900/50 text-purple-200 rounded-full">
-                            {tech}
-                          </span>
-                        ))}
+                        {project.technologies
+                          .slice(0, isMobile ? 2 : 3)
+                          .map((tech, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2 py-1 text-xs bg-purple-900/50 text-purple-200 rounded-full"
+                            >
+                              {tech}
+                            </span>
+                          ))}
                         {project.technologies.length > (isMobile ? 2 : 3) && (
                           <span className="px-2 py-1 text-xs bg-purple-900/30 text-purple-200 rounded-full">
                             +{project.technologies.length - (isMobile ? 2 : 3)}
@@ -192,7 +224,11 @@ const ProjectSlider = () => {
         ))}
       </Swiper>
 
-      <ProjectModal isOpen={modalOpen} onClose={closeModal} project={selectedProject} />
+      <ProjectModal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        project={selectedProject}
+      />
     </div>
   );
 };
