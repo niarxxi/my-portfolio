@@ -78,7 +78,7 @@ export default function Home() {
             alt="ProfilePic"
             fill
             className="object-contain"
-            sizes="(max-width: 640px) 180px, (max-width: 768px) 250px, (max-width: 1024px) 400px, 500px"
+            sizes="(max-width: 640px) 180px, (max-width: 768px) 250px, (max-width: 1024px) 1024px"
             priority
           />
         </div>
